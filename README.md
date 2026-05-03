@@ -8,8 +8,6 @@ A self-contained, browser-based tool for annotating game maps. No installation, 
 
 ![Map Annotator screenshot](screenshot.png)
 
-> *Replace `screenshot.png` with your own screenshot placed in this folder.*
-
 ---
 
 ## Features
