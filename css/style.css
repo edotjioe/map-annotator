@@ -1,0 +1,435 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
+/* ─── Layout ─────────────────────────────────────── */
+
+#app {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+#sidebar {
+  width: 270px;
+  min-width: 270px;
+  background: #16213e;
+  border-right: 1px solid #0f3460;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+#map-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+#draw-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 500;
+}
+
+/* ─── Cursor states ──────────────────────────────── */
+
+#map-container[data-tool='pan'] #map   { cursor: grab; }
+#map-container[data-tool='pan'] #map:active { cursor: grabbing; }
+#map-container[data-tool='pen']    #draw-canvas { cursor: crosshair; }
+#map-container[data-tool='marker'] #map { cursor: cell; }
+#map-container[data-tool='eraser'] #draw-canvas { cursor: cell; }
+
+/* ─── Sidebar sections ───────────────────────────── */
+
+.sidebar-section {
+  padding: 12px 14px;
+  border-bottom: 1px solid #0f3460;
+}
+
+.sidebar-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #8899bb;
+  margin-bottom: 10px;
+}
+
+/* ─── Tool buttons ───────────────────────────────── */
+
+#tool-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 6px;
+}
+
+.tool-btn {
+  background: #0f3460;
+  border: 1px solid #1a4a80;
+  border-radius: 8px;
+  color: #c0d4f0;
+  font-size: 20px;
+  padding: 8px 4px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s;
+  line-height: 1.2;
+}
+
+.tool-btn:hover { background: #1a4a80; }
+
+.tool-btn.active {
+  background: #e94560;
+  border-color: #e94560;
+  color: #fff;
+}
+
+.tool-btn span {
+  display: block;
+  font-size: 9px;
+  margin-top: 3px;
+  letter-spacing: 0.5px;
+  color: inherit;
+  opacity: 0.8;
+}
+
+/* ─── Pen settings ───────────────────────────────── */
+
+#pen-settings {
+  display: none;
+}
+
+.pen-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+#pen-color-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  flex-shrink: 0;
+}
+
+input[type='range'] {
+  flex: 1;
+  accent-color: #e94560;
+}
+
+#stroke-width-val {
+  min-width: 20px;
+  text-align: right;
+  font-size: 13px;
+  color: #c0d4f0;
+}
+
+/* ─── Category list ──────────────────────────────── */
+
+#category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 6px;
+  padding: 5px 6px;
+  cursor: default;
+  transition: background 0.1s;
+}
+
+.category-item:hover { background: #1e3a6e; }
+
+.category-item.category-selected { background: #1e3a6e; outline: 1px solid #4a80c4; }
+
+.category-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  flex: 1;
+  font-size: 13px;
+}
+
+.category-toggle { accent-color: #e94560; cursor: pointer; }
+
+.category-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.category-emoji { font-size: 15px; }
+.category-name  { color: #c8d8f0; }
+
+.category-select-btn {
+  background: none;
+  border: 1px solid #2a4a80;
+  border-radius: 4px;
+  color: #8899bb;
+  font-size: 11px;
+  padding: 2px 5px;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+
+.category-select-btn:hover {
+  background: #e94560;
+  border-color: #e94560;
+  color: #fff;
+}
+
+/* ─── Action buttons ─────────────────────────────── */
+
+.action-btn {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  background: #0f3460;
+  border: 1px solid #1a4a80;
+  border-radius: 7px;
+  color: #c0d4f0;
+  font-size: 13px;
+  padding: 8px 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  user-select: none;
+}
+
+.action-btn:hover { background: #1a4a80; }
+
+.action-btn.danger {
+  border-color: #8b2020;
+  color: #f08080;
+}
+
+.action-btn.danger:hover { background: #8b2020; color: #fff; }
+
+/* ─── Sidebar footer hint ────────────────────────── */
+
+#map-hint {
+  display: none;
+  font-size: 11px;
+  color: #7a90b0;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* ─── Map marker icons ───────────────────────────── */
+
+.map-marker {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255,255,255,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  font-size: 18px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.map-marker:hover { transform: scale(1.15); }
+
+/* ─── Leaflet popup overrides ────────────────────── */
+
+.leaflet-popup-content-wrapper {
+  background: #16213e;
+  color: #e0e0e0;
+  border: 1px solid #0f3460;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+
+.leaflet-popup-tip { background: #16213e; }
+
+.popup-content { padding: 2px 0; min-width: 180px; }
+
+.popup-badge {
+  display: inline-block;
+  border-radius: 12px;
+  padding: 2px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.popup-label {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 4px;
+  color: #e8eeff;
+}
+
+.popup-notes {
+  font-size: 12px;
+  color: #99aac0;
+  margin-bottom: 8px;
+  white-space: pre-wrap;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.popup-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.popup-btn {
+  flex: 1;
+  background: #0f3460;
+  border: 1px solid #2a5090;
+  border-radius: 5px;
+  color: #c0d4f0;
+  font-size: 12px;
+  padding: 5px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.popup-btn:hover { background: #1a5090; }
+
+.popup-delete {
+  border-color: #8b2020;
+  color: #f08080;
+}
+
+.popup-delete:hover { background: #8b2020; color: #fff; }
+
+/* ─── Modal overlay ──────────────────────────────── */
+
+#modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-box {
+  background: #16213e;
+  border: 1px solid #0f3460;
+  border-radius: 12px;
+  padding: 24px;
+  width: 360px;
+  max-width: 92vw;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+}
+
+.modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #e8eeff;
+  margin-bottom: 16px;
+}
+
+.modal-field {
+  margin-bottom: 12px;
+}
+
+.modal-field label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #8899bb;
+  margin-bottom: 5px;
+}
+
+.modal-field input,
+.modal-field textarea {
+  width: 100%;
+  background: #0f3460;
+  border: 1px solid #2a5090;
+  border-radius: 6px;
+  color: #e8eeff;
+  font-size: 14px;
+  padding: 8px 10px;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.modal-field input:focus,
+.modal-field textarea:focus {
+  border-color: #e94560;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  justify-content: flex-end;
+}
+
+.modal-btn {
+  background: #0f3460;
+  border: 1px solid #2a5090;
+  border-radius: 7px;
+  color: #c0d4f0;
+  font-size: 13px;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.modal-btn:hover { background: #1a5090; }
+
+.modal-btn.primary {
+  background: #e94560;
+  border-color: #e94560;
+  color: #fff;
+}
+
+.modal-btn.primary:hover { background: #c73050; }
+
+/* ─── Leaflet control theming ────────────────────── */
+
+.leaflet-bar a {
+  background-color: #16213e !important;
+  color: #c0d4f0 !important;
+  border-color: #0f3460 !important;
+}
+
+.leaflet-bar a:hover {
+  background-color: #0f3460 !important;
+}
+
+/* ─── Scrollbar ──────────────────────────────────── */
+
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-track { background: #0f1a30; }
+#sidebar::-webkit-scrollbar-thumb { background: #2a5090; border-radius: 2px; }
